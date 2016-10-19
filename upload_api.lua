@@ -4,7 +4,6 @@ local encode      = require("cjson.safe").encode
 local stringy     = require("tzj.stringy")
 local len         = string.len
 local sub         = string.sub
-local exec        = os.execute
 local http_host   = ngx.var.http_host
 local upload_root = ngx.var.upload_root
 local save_tempdr = ngx.var.save_tempdr
@@ -81,11 +80,24 @@ if not folder_exists(file_path) then
 end
 
 if not IO.file_exists(full_file_path) then
-    ngx.log(ngx.ERR, exec("mv " .. req_files.file['temp'] .. " " .. full_file_path), "\n")
+    local command = "mv " .. req_files.file['temp'] .. " " .. full_file_path
+    local result, result_code = IO.os_execute(command)
+    if result_code ~= 0 then
+        ngx.log(ngx.ERR, "file:", req_files.file['temp'], "error:", result_code, "result:", result)
+    end
 else
-    ngx.status = 400
-    ngx.say(encode({message='this file already exists...'}))
-    return
+    if req_post['force'] == 'true' then
+        local command = "\\mv " .. req_files.file['temp'] .. " " .. full_file_path
+        local result, result_code = IO.os_execute(command)
+        if result_code ~= 0 then
+            ngx.log(ngx.ERR, "file:", req_files.file['temp'], "error:", result_code, "result", result)
+        end
+        ngx.log(ngx.ERR, "forced write file:", req_files.file['temp'], "error:", result_code, "result:", result)
+    else
+        ngx.status = 400
+        ngx.say(encode({message='this file already exists...'}))
+        return
+    end
 end
 
 
