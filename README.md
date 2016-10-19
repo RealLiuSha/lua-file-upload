@@ -18,7 +18,6 @@ $PATH/sbin/nginx -c $PATH/lua-file-upload/nginx.conf
 ```
 curl -i http://localhost:8000/api
 HTTP/1.1 200 OK
-Server: openresty/1.11.2.1
 Date: Tue, 18 Oct 2016 11:20:22 GMT
 Content-Type: application/json
 Transfer-Encoding: chunked
@@ -37,7 +36,19 @@ Content-Type: application/json
 Transfer-Encoding: chunked
 Connection: keep-alive
 
-{"file":"ok.txt","size":0,"path":"static.touzhijia.net\/test\/ok.txt"}
+{"file":"ok.txt","size":0,"path":"coreos.me\/test\/ok.txt"}
+
+#: 如果文件存在, 替换文件
+curl -i -X POST -H "Content-Type: multipart/form-data;" -F "path=test" -F "force=true" -F "file=@./ok.txt" "http://localhost:8000/api/upload"
+HTTP/1.1 100 Continue
+
+HTTP/1.1 200 OK
+Date: Wed, 19 Oct 2016 02:19:41 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+{"file":"ok.txt","size":0,"path":"coreos.me\/test\/ok.txt"}
 ```
 
 
